@@ -64,23 +64,25 @@ function handleCancelClick(){
 }
 
 function handleDataServerClick(){
+    console.log('Get data clicked!');
     $.ajax({
         method: 'POST',
         dataType: 'json',
-        url: 'http://s-apis.learningfuze.com/sgt/get',
-        data: {api_key: '949v6hSK4M'},
+        url: 'http://localhost:8000/php/data.php',
+        data: {action: 'readAll'},
+        //data: {api_key: '949v6hSK4M'},
         success: function(response){
-            //console.log('ajax says:', response);
+            console.log('ajax says:', response);
             var serverGT = response;
             var studentLocalArray = [];
             var studentsTotalGPA = 0;
-            for (var index in serverGT.data){
+            for (let index in serverGT.data){
             // either way will work
             //for (var index = 0; index < serverGT.data.length; index++){
                 var serverStudent = {
                     name : serverGT.data[index].name,
-                    course: serverGT.data[index].course,
-                    grade: serverGT.data[index].grade,
+                    course: serverGT.data[index].course_name,
+                    grade: parseInt( serverGT.data[index].grade),
                     id: serverGT.data[index].id
                 };
                 var tableRow = $('<tr>');
@@ -109,8 +111,9 @@ function addToServer(studentObj){
     $.ajax({
         method: 'POST',
         dataType: 'json',
-        url: 'http://s-apis.learningfuze.com/sgt/create',
-        data: {api_key: '949v6hSK4M',
+        url: 'http://localhost:8000/php/data.php',
+        data: {
+                action: 'insert',
                 name: studentObj.name,
                 course: studentObj.course,
                 grade: studentObj.grade
@@ -132,15 +135,17 @@ function removeFromServer(studentIDonServer){
     $.ajax({
         method: 'POST',
         dataType: 'json',
-        url: 'http://s-apis.learningfuze.com/sgt/delete',
-        data: {api_key: '949v6hSK4M',
-            student_id: studentIDonServer
+        url: 'http://localhost:8000/php/data.php',
+        data: {
+            action: "delete",
+            id: studentIDonServer
         },
         success: function(response){
             if(!response.success){
                 alert(response.errors + ' because you did not add this student into the server');
                 console.dir(response);
             }
+            handleDataServerClick();//refresh the screen
             return response;
         }
     })
@@ -157,7 +162,7 @@ function addStudent(){
     var tempCourse = $('input[name="course"]').val();
     var tempGrade = $('input[name="studentGrade"]').val();
     tempGrade = parseInt(tempGrade);
-    debugger;
+    //debugger;
     var tempStudent = {
         name :  tempName,
         course: tempCourse,
